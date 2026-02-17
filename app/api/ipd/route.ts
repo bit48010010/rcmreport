@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       ,d2.name AS dch_doctor
       ,d3.name AS incharge_doctor
       ,rd.compensated
-      ,GROUP_CONCAT(DISTINCT rd.rep,' # ',ROUND(rd.compensated,2),'฿  ') AS rep
+      ,GROUP_CONCAT(DISTINCT rd.rep,' # ',ROUND(rd.compensated,2),'B  ') AS rep
       ,rd.TransactionType
       ,rd.percentpay
       ,rd.SendDate

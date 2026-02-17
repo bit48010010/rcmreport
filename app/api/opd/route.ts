@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       ,kt.amount AS kt_amount
       ,ovs.name AS ovstost_name
       ,rd.id AS rd_id
-      ,GROUP_CONCAT(DISTINCT rd.rep,' # ',ROUND(rd.compensated,2),'บาท  ') AS rep
+      ,GROUP_CONCAT(DISTINCT rd.rep,' # ',ROUND(rd.compensated,2),'B  ') AS rep
       ,rd.compensated
       ,rd.percentpay
       ,rd.SendDate

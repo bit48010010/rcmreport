@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useTheme } from "./context/ThemeContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -42,11 +44,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100">
+    <div className="relative flex min-h-screen overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors duration-300">
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-4 right-4 z-20 p-2.5 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white dark:hover:bg-gray-700 transition-all shadow-sm"
+        title={theme === "dark" ? "เปลี่ยนเป็น Light Mode" : "เปลี่ยนเป็น Dark Mode"}
+      >
+        {theme === "dark" ? (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        )}
+      </button>
+
       {/* Decorative background shapes */}
-      <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-200/40 to-cyan-200/30 blur-3xl" />
-      <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-indigo-200/30 to-purple-200/20 blur-3xl" />
-      <div className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-sky-200/20 blur-2xl" />
+      <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-200/40 to-cyan-200/30 dark:from-blue-900/20 dark:to-cyan-900/10 blur-3xl" />
+      <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-indigo-200/30 to-purple-200/20 dark:from-indigo-900/20 dark:to-purple-900/10 blur-3xl" />
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-sky-200/20 dark:bg-sky-900/10 blur-2xl" />
 
       {/* Left Panel — Branding & Illustration */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col items-center justify-center px-12">
@@ -67,10 +86,10 @@ export default function LoginPage() {
             />
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-800 mb-3">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
             Revenue Claim Manager
           </h2>
-          <p className="text-gray-500 text-base leading-relaxed max-w-md mx-auto">
+          <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-md mx-auto">
             ศูนย์ข้อมูลจัดเก็บรายได้หน่วยบริการ
           </p>
 
@@ -83,7 +102,7 @@ export default function LoginPage() {
             ].map((badge, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/70 text-blue-700 text-sm font-medium shadow-sm border border-blue-100"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/70 dark:bg-gray-800/70 text-blue-700 dark:text-blue-400 text-sm font-medium shadow-sm border border-blue-100 dark:border-gray-700"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={badge.icon} />
@@ -100,39 +119,49 @@ export default function LoginPage() {
         <div className="w-full max-w-[420px] animate-fade-in-up">
           {/* Mobile logo (visible on small screens) */}
           <div className="lg:hidden text-center mb-10">
-            <Image
-              src="/logorcm.png"
-              alt="RCM Logo"
-              width={80}
-              height={80}
-              className="mx-auto mb-4 rounded-2xl shadow-lg"
-            />
-            <h2 className="text-xl font-bold text-gray-800">Revenue Claim Manager</h2>
-          </div>
-
-          {/* Card */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 p-8 sm:p-10 border border-white/80">
-            {/* Header */}
-            <div className="text-center mb-8">
+            <div className="relative mx-auto w-20 h-20 mb-4">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-400 opacity-30 blur-lg animate-pulse" />
               <Image
                 src="/logorcm.png"
                 alt="RCM Logo"
-                width={64}
-                height={64}
-                className="mx-auto mb-4 rounded-2xl"
+                width={80}
+                height={80}
+                className="relative rounded-2xl shadow-lg animate-bounce-slow"
               />
-              <h1 className="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h1>
-              <p className="text-gray-400 text-sm mt-1.5">RCM Report Management System</p>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Revenue Claim Manager</h2>
+          </div>
+
+          {/* Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-blue-900/5 dark:shadow-black/20 p-8 sm:p-10 border border-white/80 dark:border-gray-700">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="relative mx-auto w-16 h-16 mb-4 group cursor-pointer">
+                {/* Glow ring */}
+                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-400 to-teal-400 opacity-0 group-hover:opacity-40 blur-md transition-opacity duration-500 animate-spin-slow" />
+                {/* Pulse ring */}
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-400 opacity-20 animate-ping-slow" />
+                {/* Logo */}
+                <Image
+                  src="/logorcm.png"
+                  alt="RCM Logo"
+                  width={64}
+                  height={64}
+                  className="relative rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+                />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">เข้าสู่ระบบ</h1>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1.5">RCM Report Management System</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
               {/* Username */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   ชื่อเข้าสู่ระบบ
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -143,18 +172,18 @@ export default function LoginPage() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
                     required
-                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   รหัสผ่าน
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -165,12 +194,12 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     required
-                    className="w-full pl-11 pr-11 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
+                    className="w-full pl-11 pr-11 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +217,7 @@ export default function LoginPage() {
 
               {/* Error */}
               {error && (
-                <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 rounded-xl px-4 py-3 border border-red-100 animate-fade-in-up">
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/30 rounded-xl px-4 py-3 border border-red-100 dark:border-red-800 animate-fade-in-up">
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -221,31 +250,23 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Register link */}
-            <div className="text-center mt-6">
-              <p className="text-sm text-gray-400">
-                คุณยังไม่มีบัญชีใช่ไหม?{" "}
-                <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors">
-                  ลงทะเบียน
-                </Link>
-              </p>
-            </div>
+
           </div>
 
           {/* Hint box */}
-          <div className="mt-4 bg-white/60 backdrop-blur-sm rounded-2xl px-5 py-3.5 border border-blue-100 shadow-sm">
+          <div className="mt-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl px-5 py-3.5 border border-blue-100 dark:border-gray-700 shadow-sm">
             <div className="flex items-start gap-2.5">
-              <svg className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-blue-400 dark:text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 เข้าสู่ระบบด้วยบัญชีผู้ใช้ที่ลงทะเบียนไว้ในระบบ
               </p>
             </div>
           </div>
 
           {/* Footer */}
-          <p className="text-center text-xs text-gray-400 mt-6">
+          <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6">
             © 2026 RCM Report System · กระทรวงสาธารณสุข
           </p>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import ExportButtons from "@/components/ExportButtons";
 
 // === Mock Data ===
@@ -77,21 +78,46 @@ function CardIcon({ type }: { type: string }) {
 
 export default function DashboardPage() {
   const maxBar = Math.max(...monthlyData.map((d) => d.value));
+  const router = useRouter();
 
   return (
     <>
+      {/* Quick Action - Import */}
+      <button
+        onClick={() => router.push("/dashboard/import")}
+        className="w-full bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 text-white rounded-2xl p-6 flex items-center justify-between gap-4 shadow-md hover:shadow-lg transition-all duration-300 group cursor-pointer"
+      >
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          </div>
+          <div className="text-left">
+            <h3 className="text-xl font-bold">Import ข้อมูล</h3>
+            <p className="text-sm text-blue-100 mt-0.5">นำเข้าไฟล์ตอบกลับ REP / Statement จาก สปสช.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-blue-100 group-hover:text-white group-hover:translate-x-1 transition-all">
+          <span className="text-sm font-medium hidden sm:inline">เปิดหน้านำเข้า</span>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </div>
+      </button>
+
       {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {summaryCards.map((card, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl p-6 animate-fade-in-up border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 animate-fade-in-up border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">{card.title}</p>
-                    <p className="text-2xl font-bold text-gray-800 mt-2">{card.value}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{card.title}</p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2">{card.value}</p>
                     <div className={`flex items-center gap-1 mt-2 text-sm ${card.up ? "text-emerald-500" : "text-red-500"}`}>
                       <svg className={`w-4 h-4 ${card.up ? "" : "rotate-180"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -100,10 +126,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    i === 0 ? "bg-blue-50 text-blue-500" :
-                    i === 1 ? "bg-purple-50 text-purple-500" :
-                    i === 2 ? "bg-amber-50 text-amber-500" :
-                    "bg-emerald-50 text-emerald-500"
+                    i === 0 ? "bg-blue-50 dark:bg-blue-900/30 text-blue-500" :
+                    i === 1 ? "bg-purple-50 dark:bg-purple-900/30 text-purple-500" :
+                    i === 2 ? "bg-amber-50 dark:bg-amber-900/30 text-amber-500" :
+                    "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500"
                   }`}>
                     <CardIcon type={card.icon} />
                   </div>
@@ -115,14 +141,14 @@ export default function DashboardPage() {
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Bar Chart */}
-            <div className="lg:col-span-2 bg-white rounded-2xl p-6 animate-fade-in-up border border-gray-100 shadow-sm" style={{ animationDelay: "0.4s" }}>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 animate-fade-in-up border border-gray-100 dark:border-gray-700 shadow-sm" style={{ animationDelay: "0.4s" }}>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">รายได้รายเดือน</h3>
-                  <p className="text-xs text-gray-400 mt-1">ข้อมูลปี 2569</p>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">รายได้รายเดือน</h3>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">ข้อมูลปี 2569</p>
                 </div>
                 <div className="flex gap-2">
-                  <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium">รายเดือน</span>
+                  <span className="px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium">รายเดือน</span>
                 </div>
               </div>
               <div className="flex items-end gap-2 h-48">
@@ -142,23 +168,23 @@ export default function DashboardPage() {
                         }}
                       />
                     </div>
-                    <span className="text-[10px] text-gray-500">{d.month}</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400">{d.month}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Donut/Department Chart */}
-            <div className="bg-white rounded-2xl p-6 animate-fade-in-up border border-gray-100 shadow-sm" style={{ animationDelay: "0.5s" }}>
-              <h3 className="text-lg font-semibold text-gray-800 mb-6">สัดส่วนแผนก</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 animate-fade-in-up border border-gray-100 dark:border-gray-700 shadow-sm" style={{ animationDelay: "0.5s" }}>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">สัดส่วนแผนก</h3>
               <div className="space-y-4">
                 {departmentData.map((dept, i) => (
                   <div key={i} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-700">{dept.name}</span>
-                      <span className="text-gray-500 font-mono">{dept.value}%</span>
+                      <span className="text-gray-700 dark:text-gray-300">{dept.name}</span>
+                      <span className="text-gray-500 dark:text-gray-400 font-mono">{dept.value}%</span>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full bg-gradient-to-r ${dept.color} transition-all duration-1000`}
                         style={{
@@ -172,10 +198,10 @@ export default function DashboardPage() {
                 ))}
               </div>
               {/* Total Center */}
-              <div className="mt-6 pt-4 border-t border-gray-100">
+              <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-800">3,842</p>
-                  <p className="text-xs text-gray-500 mt-1">เคสทั้งหมด</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">3,842</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">เคสทั้งหมด</p>
                 </div>
               </div>
             </div>
@@ -184,9 +210,9 @@ export default function DashboardPage() {
           {/* Bottom Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Activities */}
-            <div className="bg-white rounded-2xl p-6 animate-fade-in-up border border-gray-100 shadow-sm" style={{ animationDelay: "0.6s" }}>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 animate-fade-in-up border border-gray-100 dark:border-gray-700 shadow-sm" style={{ animationDelay: "0.6s" }}>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-800">กิจกรรมล่าสุด</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">กิจกรรมล่าสุด</h3>
                 <div className="flex items-center gap-2">
                   <ExportButtons
                     data={recentActivities}
@@ -206,13 +232,13 @@ export default function DashboardPage() {
                 {recentActivities.map((activity, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors animate-slide-in-left"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-slide-in-left"
                     style={{ animationDelay: `${0.7 + i * 0.1}s` }}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      activity.status === "สำเร็จ" ? "bg-emerald-50 text-emerald-500" :
-                      activity.status === "ปฏิเสธ" ? "bg-red-50 text-red-500" :
-                      "bg-amber-50 text-amber-500"
+                      activity.status === "สำเร็จ" ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500" :
+                      activity.status === "ปฏิเสธ" ? "bg-red-50 dark:bg-red-900/30 text-red-500" :
+                      "bg-amber-50 dark:bg-amber-900/30 text-amber-500"
                     }`}>
                       {activity.status === "สำเร็จ" ? (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,15 +255,15 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-800 truncate">{activity.action}</p>
-                      <p className="text-xs text-gray-400">{activity.patient} · {activity.time}</p>
+                      <p className="text-sm text-gray-800 dark:text-gray-200 truncate">{activity.action}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{activity.patient} · {activity.time}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-medium text-gray-800">{activity.amount}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{activity.amount}</p>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                        activity.status === "สำเร็จ" ? "bg-emerald-50 text-emerald-600" :
-                        activity.status === "ปฏิเสธ" ? "bg-red-50 text-red-600" :
-                        "bg-amber-50 text-amber-600"
+                        activity.status === "สำเร็จ" ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" :
+                        activity.status === "ปฏิเสธ" ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400" :
+                        "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
                       }`}>
                         {activity.status}
                       </span>
@@ -248,9 +274,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Top DRGs */}
-            <div className="bg-white rounded-2xl p-6 animate-fade-in-up border border-gray-100 shadow-sm" style={{ animationDelay: "0.7s" }}>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 animate-fade-in-up border border-gray-100 dark:border-gray-700 shadow-sm" style={{ animationDelay: "0.7s" }}>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-800">Top DRG</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Top DRG</h3>
                 <div className="flex items-center gap-2">
                   <ExportButtons
                     data={topDRGs}
@@ -266,7 +292,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="grid grid-cols-12 text-xs text-gray-500 px-3 pb-2 border-b border-gray-100">
+                <div className="grid grid-cols-12 text-xs text-gray-500 dark:text-gray-400 px-3 pb-2 border-b border-gray-100 dark:border-gray-700">
                   <span className="col-span-3">รหัส DRG</span>
                   <span className="col-span-4">รายละเอียด</span>
                   <span className="col-span-2 text-right">เคส</span>
@@ -275,20 +301,20 @@ export default function DashboardPage() {
                 {topDRGs.map((drg, i) => (
                   <div
                     key={i}
-                    className="grid grid-cols-12 items-center text-sm px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors animate-slide-in-left"
+                    className="grid grid-cols-12 items-center text-sm px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-slide-in-left"
                     style={{ animationDelay: `${0.8 + i * 0.1}s` }}
                   >
-                    <span className="col-span-3 text-blue-600 font-mono text-xs">{drg.code}</span>
-                    <span className="col-span-4 text-gray-700 truncate">{drg.desc}</span>
-                    <span className="col-span-2 text-right text-gray-500 font-mono">{drg.cases}</span>
+                    <span className="col-span-3 text-blue-600 dark:text-blue-400 font-mono text-xs">{drg.code}</span>
+                    <span className="col-span-4 text-gray-700 dark:text-gray-300 truncate">{drg.desc}</span>
+                    <span className="col-span-2 text-right text-gray-500 dark:text-gray-400 font-mono">{drg.cases}</span>
                     <span className="col-span-3 text-right text-emerald-600 font-medium">{drg.revenue}</span>
                   </div>
                 ))}
               </div>
               {/* Summary Bar */}
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm">
-                <span className="text-gray-500">รวมทั้งหมด</span>
-                <span className="text-gray-800 font-bold">฿7,465,000</span>
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">รวมทั้งหมด</span>
+                <span className="text-gray-800 dark:text-gray-100 font-bold">฿7,465,000</span>
               </div>
             </div>
           </div>

@@ -55,11 +55,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100">
+    <div className="relative flex min-h-screen overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Decorative background shapes */}
-      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-200/40 to-cyan-200/30 blur-3xl" />
-      <div className="absolute -bottom-60 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-indigo-200/30 to-purple-200/20 blur-3xl" />
-      <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full bg-sky-200/20 blur-2xl" />
+      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-200/40 to-cyan-200/30 dark:from-blue-900/30 dark:to-cyan-900/20 blur-3xl" />
+      <div className="absolute -bottom-60 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-indigo-200/30 to-purple-200/20 dark:from-indigo-900/20 dark:to-purple-900/10 blur-3xl" />
+      <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full bg-sky-200/20 dark:bg-sky-900/10 blur-2xl" />
 
       {/* Left Panel — Branding */}
       <div className="hidden lg:flex lg:w-[55%] relative flex-col items-center justify-center px-12">
@@ -94,10 +94,10 @@ export default function RegisterPage() {
             </svg>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-800 mb-3">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
             สมัครใช้งานระบบ
           </h2>
-          <p className="text-gray-500 text-base leading-relaxed max-w-md mx-auto">
+          <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-md mx-auto">
             ลงทะเบียนเพื่อเข้าใช้งานระบบรายงานข้อมูลทางการเงิน<br />
             RCM Report Management System
           </p>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
             ].map((badge, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/70 text-blue-700 text-sm font-medium shadow-sm border border-blue-100"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/70 dark:bg-gray-800/70 text-blue-700 text-sm font-medium shadow-sm border border-blue-100 dark:border-blue-900"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={badge.icon} />
@@ -132,28 +132,28 @@ export default function RegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-800">สมัครใช้งาน</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">สมัครใช้งาน</h2>
           </div>
 
           {/* Card */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 p-8 sm:p-10 border border-white/80">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-blue-900/5 p-8 sm:p-10 border border-white/80 dark:border-gray-700">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 mb-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/30 mb-4">
                 <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-800">ลงทะเบียน</h1>
-              <p className="text-gray-400 text-sm mt-1.5">สร้างบัญชีเพื่อเข้าใช้งานระบบ</p>
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">ลงทะเบียน</h1>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1.5">สร้างบัญชีเพื่อเข้าใช้งานระบบ</p>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Name */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-600">ชื่อ-นามสกุล</label>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">ชื่อ-นามสกุล</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -164,16 +164,16 @@ export default function RegisterPage() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="กรอกชื่อ-นามสกุล"
                     required
-                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
                   />
                 </div>
               </div>
 
               {/* Username */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-600">ชื่อเข้าสู่ระบบ</label>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">ชื่อเข้าสู่ระบบ</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -184,16 +184,16 @@ export default function RegisterPage() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
                     required
-                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-600">รหัสผ่าน</label>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">รหัสผ่าน</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -204,12 +204,12 @@ export default function RegisterPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     required
-                    className="w-full pl-11 pr-11 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
+                    className="w-full pl-11 pr-11 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,9 +227,9 @@ export default function RegisterPage() {
 
               {/* Confirm Password */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-600">ยืนยันรหัสผ่าน</label>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">ยืนยันรหัสผ่าน</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
@@ -240,14 +240,14 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm Password"
                     required
-                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all duration-200 text-sm"
                   />
                 </div>
               </div>
 
               {/* Error */}
               {error && (
-                <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 rounded-xl px-4 py-3 border border-red-100 animate-fade-in-up">
+                <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 dark:bg-red-900/30 rounded-xl px-4 py-3 border border-red-100 dark:border-red-800 animate-fade-in-up">
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -257,7 +257,7 @@ export default function RegisterPage() {
 
               {/* Success */}
               {success && (
-                <div className="flex items-center gap-2 text-emerald-600 text-sm bg-emerald-50 rounded-xl px-4 py-3 border border-emerald-100 animate-fade-in-up">
+                <div className="flex items-center gap-2 text-emerald-600 text-sm bg-emerald-50 dark:bg-emerald-900/30 rounded-xl px-4 py-3 border border-emerald-100 dark:border-emerald-800 animate-fade-in-up">
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -292,7 +292,7 @@ export default function RegisterPage() {
 
             {/* Login link */}
             <div className="text-center mt-6">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
                 มีบัญชีอยู่แล้ว?{" "}
                 <Link href="/" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors">
                   เข้าสู่ระบบ
@@ -302,7 +302,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-xs text-gray-400 mt-6">
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
             © 2026 RCM Report System · กระทรวงสาธารณสุข
           </p>
         </div>

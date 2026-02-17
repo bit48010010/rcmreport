@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import ExportButtons from "@/components/ExportButtons";
 
 // === Mock Data: ส่งเสริมป้องกัน (Health Promotion & Prevention) ===
@@ -35,37 +36,75 @@ export default function PreventionPage() {
   const maxBar = Math.max(...monthlyPP.map((d) => d.value));
   const totalServices = monthlyPP.reduce((sum, d) => sum + d.value, 0);
   const passCount = ppData.filter((d) => d.status === "ผ่านเกณฑ์").length;
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+
+  const ppColumns: { key: string; label: string; align: string }[] = [
+    { key: "code", label: "รหัส", align: "text-left" },
+    { key: "activity", label: "กิจกรรม", align: "text-left" },
+    { key: "target", label: "เป้าหมาย", align: "text-right" },
+    { key: "achieved", label: "ดำเนินการ", align: "text-right" },
+    { key: "percent", label: "ร้อยละ", align: "text-right" },
+    { key: "budget", label: "งบประมาณ", align: "text-right" },
+    { key: "status", label: "สถานะ", align: "text-center" },
+  ];
+
+  const sortedPpData = (() => {
+    let result = [...ppData];
+    for (const [key, val] of Object.entries(columnFilters)) {
+      if (!val) continue;
+      const s = val.toLowerCase();
+      result = result.filter((row) => {
+        const cellVal = row[key as keyof typeof row];
+        return cellVal != null && String(cellVal).toLowerCase().includes(s);
+      });
+    }
+    if (sortKey) {
+      result.sort((a, b) => {
+        const va = a[sortKey as keyof typeof a];
+        const vb = b[sortKey as keyof typeof b];
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        const na = Number(va), nb = Number(vb);
+        if (!isNaN(na) && !isNaN(nb)) return sortDir === "asc" ? na - nb : nb - na;
+        return sortDir === "asc" ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+      });
+    }
+    return result;
+  })();
 
   return (
     <>
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">บริการทั้งหมด</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{totalServices.toLocaleString()}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <p className="text-sm text-gray-500 dark:text-gray-400">บริการทั้งหมด</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">{totalServices.toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">ผ่านเกณฑ์</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <p className="text-sm text-gray-500 dark:text-gray-400">ผ่านเกณฑ์</p>
           <p className="text-2xl font-bold text-emerald-600 mt-1">{passCount}/{ppData.length} ตัวชี้วัด</p>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">ไม่ผ่านเกณฑ์</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <p className="text-sm text-gray-500 dark:text-gray-400">ไม่ผ่านเกณฑ์</p>
           <p className="text-2xl font-bold text-red-500 mt-1">{ppData.length - passCount}/{ppData.length} ตัวชี้วัด</p>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm text-gray-500">งบประมาณรวม</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <p className="text-sm text-gray-500 dark:text-gray-400">งบประมาณรวม</p>
           <p className="text-2xl font-bold text-blue-600 mt-1">฿6.12M</p>
         </div>
       </div>
 
       {/* Bar Chart */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-fade-in-up">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">จำนวนบริการส่งเสริมป้องกันรายเดือน</h3>
-            <p className="text-xs text-gray-400 mt-1">ข้อมูลปี 2569</p>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">จำนวนบริการส่งเสริมป้องกันรายเดือน</h3>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">ข้อมูลปี 2569</p>
           </div>
-          <span className="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-medium">PP Service</span>
+          <span className="px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 text-xs font-medium">PP Service</span>
         </div>
         <div className="flex items-end gap-2 h-52">
           {monthlyPP.map((d, i) => (
@@ -83,18 +122,18 @@ export default function PreventionPage() {
                   }}
                 />
               </div>
-              <span className="text-[10px] text-gray-500">{d.month}</span>
+              <span className="text-[10px] text-gray-500 dark:text-gray-400">{d.month}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-800">รายงานส่งเสริมสุขภาพและป้องกันโรค</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">รายงานส่งเสริมสุขภาพและป้องกันโรค</h3>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400">แสดง {ppData.length} กิจกรรม</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">แสดง {ppData.length} กิจกรรม</span>
             <ExportButtons
               data={ppData}
               columns={[
@@ -113,23 +152,50 @@ export default function PreventionPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">รหัส</th>
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">กิจกรรม</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">เป้าหมาย</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">ดำเนินการ</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">ร้อยละ</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">งบประมาณ</th>
-                <th className="text-center py-3 px-3 text-gray-500 font-medium">สถานะ</th>
+              <tr className="border-b border-gray-200 dark:border-gray-600">
+                {ppColumns.map((col) => {
+                  const isSorted = sortKey === col.key;
+                  return (
+                    <th key={col.key} className={`${col.align} py-1 px-3 text-gray-800 dark:text-gray-100 font-bold`}>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          onClick={() => {
+                            if (sortKey === col.key) setSortDir(sortDir === "asc" ? "desc" : "asc");
+                            else { setSortKey(col.key); setSortDir("asc"); }
+                          }}
+                          className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${col.align === "text-right" || col.align === "text-center" ? "justify-end" : ""}`}
+                        >
+                          {col.label}
+                          {isSorted ? (
+                            <svg className="w-3 h-3 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortDir === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                            </svg>
+                          ) : (
+                            <svg className="w-3 h-3 shrink-0 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                          )}
+                        </button>
+                        <input
+                          type="text"
+                          placeholder="กรอง..."
+                          value={columnFilters[col.key] || ""}
+                          onChange={(e) => setColumnFilters((prev) => ({ ...prev, [col.key]: e.target.value }))}
+                          className="w-full border border-gray-200 dark:border-gray-600 rounded px-1 py-0.5 text-[10px] text-gray-600 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 bg-white dark:bg-gray-700"
+                        />
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
-              {ppData.map((row, i) => (
-                <tr key={i} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+              {sortedPpData.map((row, i) => (
+                <tr key={i} className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <td className="py-3 px-3 font-mono text-emerald-600 text-xs">{row.code}</td>
-                  <td className="py-3 px-3 text-gray-800">{row.activity}</td>
-                  <td className="py-3 px-3 text-right text-gray-500 font-mono">{row.target.toLocaleString()}</td>
-                  <td className="py-3 px-3 text-right text-gray-800 font-mono">{row.achieved.toLocaleString()}</td>
+                  <td className="py-3 px-3 text-gray-800 dark:text-gray-100">{row.activity}</td>
+                  <td className="py-3 px-3 text-right text-gray-500 dark:text-gray-400 font-mono">{row.target.toLocaleString()}</td>
+                  <td className="py-3 px-3 text-right text-gray-800 dark:text-gray-100 font-mono">{row.achieved.toLocaleString()}</td>
                   <td className="py-3 px-3 text-right">
                     <span className={`font-medium ${
                       parseFloat(row.percent) >= 80 ? "text-emerald-600" : "text-red-500"
@@ -137,10 +203,10 @@ export default function PreventionPage() {
                       {row.percent}
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-right text-gray-700 font-medium">{row.budget}</td>
+                  <td className="py-3 px-3 text-right text-gray-700 dark:text-gray-300 font-medium">{row.budget}</td>
                   <td className="py-3 px-3 text-center">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      row.status === "ผ่านเกณฑ์" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                      row.status === "ผ่านเกณฑ์" ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600" : "bg-red-50 dark:bg-red-900/30 text-red-600"
                     }`}>
                       {row.status}
                     </span>
@@ -151,12 +217,12 @@ export default function PreventionPage() {
           </table>
         </div>
         {/* Progress bar summary */}
-        <div className="mt-6 pt-4 border-t border-gray-100">
+        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-gray-500">ภาพรวมผ่านเกณฑ์</span>
-            <span className="font-bold text-gray-800">{passCount}/{ppData.length} ({((passCount / ppData.length) * 100).toFixed(0)}%)</span>
+            <span className="text-gray-500 dark:text-gray-400">ภาพรวมผ่านเกณฑ์</span>
+            <span className="font-bold text-gray-800 dark:text-gray-100">{passCount}/{ppData.length} ({((passCount / ppData.length) * 100).toFixed(0)}%)</span>
           </div>
-          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000"
               style={{ width: `${(passCount / ppData.length) * 100}%` }}

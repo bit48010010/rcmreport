@@ -149,7 +149,7 @@ export default function ExportButtons({ data, columns, fileName = "report" }: Ex
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 w-52 py-1 animate-fade-in-up">
+        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 w-52 py-1 animate-fade-in-up">
           {formats.map((f, i) => (
             <button
               key={i}
@@ -160,8 +160,8 @@ export default function ExportButtons({ data, columns, fileName = "report" }: Ex
               {f.label}
             </button>
           ))}
-          <div className="border-t border-gray-100 mt-1 pt-1 px-4 py-1.5">
-            <span className="text-[10px] text-gray-400">{data.length.toLocaleString()} รายการ</span>
+          <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-4 py-1.5">
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">{data.length.toLocaleString()} รายการ</span>
           </div>
         </div>
       )}

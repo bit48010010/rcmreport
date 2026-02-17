@@ -336,6 +336,9 @@ export default function OutpatientPage() {
   const [visibleKeys, setVisibleKeys] = useState<string[]>(defaultVisibleKeys);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [pttypeOptions, setPttypeOptions] = useState<{ pttype: string; name: string; label: string }[]>([]);
   const [selectedPttypes, setSelectedPttypes] = useState<string[]>([]);
   const [showPttypePicker, setShowPttypePicker] = useState(false);
@@ -389,19 +392,41 @@ export default function OutpatientPage() {
   const allColumns = columnGroups.flatMap((g) => g.columns);
   const activeColumns = allColumns.filter((c) => visibleKeys.includes(c.key));
 
-  // Filter rows by search text
-  const filteredData = searchText
-    ? data.filter((row) => {
-        const s = searchText.toLowerCase();
-        return (
-          (row.hn && row.hn.toLowerCase().includes(s)) ||
-          (row.vn && row.vn.toLowerCase().includes(s)) ||
-          (row.pdx && row.pdx.toLowerCase().includes(s)) ||
-          (row.pttypename && row.pttypename.toLowerCase().includes(s)) ||
-          (row.doctorname && row.doctorname.toLowerCase().includes(s))
-        );
-      })
-    : data;
+  // Filter rows by search text + column filters + sort
+  const filteredData = (() => {
+    let result = data;
+    if (searchText) {
+      const s = searchText.toLowerCase();
+      result = result.filter((row) =>
+        (row.hn && row.hn.toLowerCase().includes(s)) ||
+        (row.vn && row.vn.toLowerCase().includes(s)) ||
+        (row.pdx && row.pdx.toLowerCase().includes(s)) ||
+        (row.pttypename && row.pttypename.toLowerCase().includes(s)) ||
+        (row.doctorname && row.doctorname.toLowerCase().includes(s))
+      );
+    }
+    for (const [key, val] of Object.entries(columnFilters)) {
+      if (!val) continue;
+      const s = val.toLowerCase();
+      result = result.filter((row) => {
+        const cellVal = row[key as keyof OpdRow];
+        return cellVal != null && String(cellVal).toLowerCase().includes(s);
+      });
+    }
+    if (sortKey) {
+      result = [...result].sort((a, b) => {
+        const va = a[sortKey as keyof OpdRow];
+        const vb = b[sortKey as keyof OpdRow];
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        const na = Number(va), nb = Number(vb);
+        if (!isNaN(na) && !isNaN(nb)) return sortDir === "asc" ? na - nb : nb - na;
+        return sortDir === "asc" ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+      });
+    }
+    return result;
+  })();
 
   // Compute summary stats
   const totalIncome = data.reduce((s, r) => s + (Number(r.income) || 0), 0);
@@ -415,11 +440,11 @@ export default function OutpatientPage() {
   return (
     <>
       {/* Search Bar */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
         <div className="flex flex-wrap items-end gap-4">
           {/* Fiscal Year Selector */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1">ปีงบประมาณ (พ.ศ.)</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">ปีงบประมาณ (พ.ศ.)</label>
             <select
               value={fiscalYear}
               onChange={(e) => {
@@ -432,7 +457,7 @@ export default function OutpatientPage() {
                   setEndDate(range.end);
                 }
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 min-w-[130px]"
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:text-gray-200 dark:bg-gray-700 min-w-[130px]"
             >
               <option value="">-- เลือก --</option>
               {getFiscalYearOptions().map((y) => (
@@ -441,28 +466,28 @@ export default function OutpatientPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">วันที่เริ่มต้น</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">วันที่เริ่มต้น</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => { setStartDate(e.target.value); setFiscalYear(""); setSelectedMonth(null); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700"
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:text-gray-200 dark:bg-gray-700"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">วันที่สิ้นสุด</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">วันที่สิ้นสุด</label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => { setEndDate(e.target.value); setFiscalYear(""); setSelectedMonth(null); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700"
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:text-gray-200 dark:bg-gray-700"
             />
           </div>
           <div className="relative">
-            <label className="block text-xs text-gray-500 mb-1">สิทธิ์การรักษา</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">สิทธิ์การรักษา</label>
             <button
               onClick={() => setShowPttypePicker(!showPttypePicker)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 min-w-[200px] text-left flex items-center justify-between gap-2"
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 dark:text-gray-200 dark:bg-gray-700 min-w-[200px] text-left flex items-center justify-between gap-2"
             >
               <span className="truncate">
                 {selectedPttypes.length === 0
@@ -474,25 +499,25 @@ export default function OutpatientPage() {
               </svg>
             </button>
             {showPttypePicker && (
-              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 w-80 max-h-72 flex flex-col">
-                <div className="p-2 border-b border-gray-100">
+              <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg z-50 w-80 max-h-72 flex flex-col">
+                <div className="p-2 border-b border-gray-100 dark:border-gray-700">
                   <input
                     type="text"
                     placeholder="ค้นหาสิทธิ์..."
                     value={pttypeSearch}
                     onChange={(e) => setPttypeSearch(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-700"
+                    className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-700 dark:text-gray-200 dark:bg-gray-700"
                   />
                 </div>
-                <div className="p-2 border-b border-gray-100 flex gap-2">
+                <div className="p-2 border-b border-gray-100 dark:border-gray-700 flex gap-2">
                   <button onClick={() => setSelectedPttypes(pttypeOptions.map(p => p.pttype))} className="text-[10px] text-blue-500 hover:text-blue-700">เลือกทั้งหมด</button>
-                  <button onClick={() => setSelectedPttypes([])} className="text-[10px] text-gray-500 hover:text-gray-700">ล้าง</button>
+                  <button onClick={() => setSelectedPttypes([])} className="text-[10px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">ล้าง</button>
                 </div>
                 <div className="overflow-y-auto flex-1 p-1">
                   {pttypeOptions
                     .filter((p) => !pttypeSearch || p.label.toLowerCase().includes(pttypeSearch.toLowerCase()))
                     .map((p) => (
-                      <label key={p.pttype} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-50 cursor-pointer text-xs text-gray-700">
+                      <label key={p.pttype} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
                         <input
                           type="checkbox"
                           checked={selectedPttypes.includes(p.pttype)}
@@ -529,7 +554,7 @@ export default function OutpatientPage() {
           </button>
           <button
             onClick={() => setShowColumnPicker(!showColumnPicker)}
-            className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition-colors flex items-center gap-1"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -543,7 +568,7 @@ export default function OutpatientPage() {
                 placeholder="ค้นหา HN, VN, PDx..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-56 text-gray-700"
+                className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-56 text-gray-700 dark:text-gray-200 dark:bg-gray-700"
               />
             </div>
           )}
@@ -551,9 +576,9 @@ export default function OutpatientPage() {
 
         {/* Column Picker */}
         {showColumnPicker && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-semibold text-gray-700">เลือกคอลัมน์ที่ต้องการแสดง</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">เลือกคอลัมน์ที่ต้องการแสดง</h4>
               <div className="flex gap-2">
                 <button
                   onClick={() => setVisibleKeys(allColumns.map((c) => c.key))}
@@ -563,7 +588,7 @@ export default function OutpatientPage() {
                 </button>
                 <button
                   onClick={() => setVisibleKeys(defaultVisibleKeys)}
-                  className="text-xs text-gray-500 hover:text-gray-700"
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   ค่าเริ่มต้น
                 </button>
@@ -572,10 +597,10 @@ export default function OutpatientPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {columnGroups.map((group) => (
                 <div key={group.label}>
-                  <p className="text-xs font-semibold text-gray-500 mb-2 uppercase">{group.label}</p>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">{group.label}</p>
                   <div className="space-y-1">
                     {group.columns.map((col) => (
-                      <label key={col.key} className="flex items-center gap-2 cursor-pointer text-xs text-gray-600 hover:text-gray-800">
+                      <label key={col.key} className="flex items-center gap-2 cursor-pointer text-xs text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100">
                         <input
                           type="checkbox"
                           checked={visibleKeys.includes(col.key)}
@@ -594,9 +619,9 @@ export default function OutpatientPage() {
 
         {/* Fiscal Year Month Buttons */}
         {fiscalYear && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-2">
-              <h4 className="text-sm font-semibold text-gray-700">เดือนในปีงบประมาณ {fiscalYear}</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">เดือนในปีงบประมาณ {fiscalYear}</h4>
               <button
                 onClick={() => {
                   setSelectedMonth(null);
@@ -607,7 +632,7 @@ export default function OutpatientPage() {
                 className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
                   selectedMonth === null
                     ? "bg-blue-500 text-white"
-                    : "text-blue-500 hover:bg-blue-50"
+                    : "text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                 }`}
               >
                 ทั้งปี
@@ -628,7 +653,7 @@ export default function OutpatientPage() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                       isActive
                         ? "bg-blue-500 text-white shadow-sm"
-                        : "bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600"
                     }`}
                   >
                     {fm.label}
@@ -642,7 +667,7 @@ export default function OutpatientPage() {
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl p-4 text-sm">
           {error}
         </div>
       )}
@@ -650,24 +675,24 @@ export default function OutpatientPage() {
       {/* Summary Stats */}
       {data.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">จำนวน Visit</p>
-            <p className="text-2xl font-bold text-gray-800 mt-1">{total.toLocaleString()}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">จำนวน Visit</p>
+            <p className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">{total.toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">รายรับรวม</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">รายรับรวม</p>
             <p className="text-xl font-bold text-blue-600 mt-1">฿{formatNum(totalIncome)}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">รับชำระรวม</p>
-            <p className="text-xl font-bold text-emerald-600 mt-1">฿{formatNum(totalRcpt)}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">รับชำระรวม</p>
+            <p className="text-xl font-bold text-amber-500 mt-1">฿{formatNum(totalRcpt)}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">ชดเชย REP</p>
-            <p className="text-xl font-bold text-purple-600 mt-1">฿{formatNum(totalCompensated)}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">จำนวน REP</p>
+            <p className="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1">฿{formatNum(totalCompensated)}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">FDH จ่าย</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400">FDH จ่าย</p>
             <p className="text-xl font-bold text-amber-600 mt-1">฿{formatNum(totalFdhAmt)}</p>
           </div>
         </div>
@@ -696,20 +721,20 @@ export default function OutpatientPage() {
         const totalHn = totalHnSet.size;
 
         return (
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-fade-in-up">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm animate-fade-in-up">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">เปรียบเทียบจำนวนคน (HN) และจำนวนครั้ง (VN) รายวัน</h3>
-                <p className="text-xs text-gray-400 mt-1">{startDate} ถึง {endDate}</p>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">เปรียบเทียบจำนวนคน (HN) และจำนวนครั้ง (VN) รายวัน</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{startDate} ถึง {endDate}</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-sm bg-gradient-to-t from-blue-500 to-cyan-400" />
-                  <span className="text-xs text-gray-600">VN จำนวนครั้ง <span className="font-bold text-blue-600">{totalVn.toLocaleString()}</span></span>
+                  <span className="text-xs text-gray-600 dark:text-gray-300">VN จำนวนครั้ง <span className="font-bold text-blue-600">{totalVn.toLocaleString()}</span></span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-sm bg-gradient-to-t from-emerald-500 to-teal-400" />
-                  <span className="text-xs text-gray-600">HN จำนวนคน <span className="font-bold text-emerald-600">{totalHn.toLocaleString()}</span></span>
+                  <span className="text-xs text-gray-600 dark:text-gray-300">HN จำนวนคน <span className="font-bold text-emerald-600">{totalHn.toLocaleString()}</span></span>
                 </div>
               </div>
             </div>
@@ -746,7 +771,7 @@ export default function OutpatientPage() {
                       />
                     </div>
                   </div>
-                  <span className="text-[9px] text-gray-500 whitespace-nowrap">{d.date}</span>
+                  <span className="text-[9px] text-gray-500 dark:text-gray-400 whitespace-nowrap">{d.date}</span>
                 </div>
               ))}
             </div>
@@ -762,16 +787,16 @@ export default function OutpatientPage() {
         const filledPct = (totalFilled / data.length) * 100;
 
         return (
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-fade-in-up">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm animate-fade-in-up">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">สรุปรหัส PDx</h3>
-                <p className="text-xs text-gray-400 mt-1">{startDate} ถึง {endDate} · ทั้งหมด {data.length.toLocaleString()} รายการ</p>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">สรุปรหัส PDx</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{startDate} ถึง {endDate} · ทั้งหมด {data.length.toLocaleString()} รายการ</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* PDx ว่าง */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-red-50 border border-red-100">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-rose-400 flex items-center justify-center text-white shrink-0">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -784,14 +809,14 @@ export default function OutpatientPage() {
                     <div className="flex items-center justify-between text-xs mb-1">
                       <span className="text-red-500">{emptyPct.toFixed(1)}%</span>
                     </div>
-                    <div className="h-2 bg-red-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-red-100 dark:bg-red-900/30 rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-gradient-to-r from-red-500 to-rose-400 transition-all duration-1000" style={{ width: `${emptyPct}%` }} />
                     </div>
                   </div>
                 </div>
               </div>
               {/* มี PDx */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 border border-green-100">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-400 flex items-center justify-center text-white shrink-0">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -804,7 +829,7 @@ export default function OutpatientPage() {
                     <div className="flex items-center justify-between text-xs mb-1">
                       <span className="text-green-500">{filledPct.toFixed(1)}%</span>
                     </div>
-                    <div className="h-2 bg-green-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-green-100 dark:bg-green-900/30 rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000" style={{ width: `${filledPct}%` }} />
                     </div>
                   </div>
@@ -817,11 +842,11 @@ export default function OutpatientPage() {
 
       {/* Data Table */}
       {data.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">รายงานผู้ป่วยนอก</h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">รายงานผู้ป่วยนอก</h3>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 dark:text-gray-500">
                 {searchText ? `${filteredData.length} จาก ` : ""}
                 {total.toLocaleString()} รายการ
               </span>
@@ -830,23 +855,56 @@ export default function OutpatientPage() {
           </div>
           <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
             <table className="text-xs border-collapse" style={{ width: 'max-content' }}>
-              <thead className="sticky top-0 z-5 bg-gray-50">
-                <tr className="border-b border-gray-200">
-                  <th className="text-center py-2.5 px-1.5 text-gray-500 font-medium">#</th>
-                  {activeColumns.map((col) => (
-                    <th
-                      key={col.key}
-                      className={`py-2.5 px-1.5 text-gray-500 font-medium whitespace-nowrap ${"numeric" in col && col.numeric ? "text-right" : "text-left"}`}
-                    >
-                      {col.label}
-                    </th>
-                  ))}
+              <thead className="sticky top-0 z-5 bg-gray-50 dark:bg-gray-700">
+                <tr className="border-b border-gray-200 dark:border-gray-600">
+                  <th className="text-center py-2.5 px-1.5 text-gray-800 dark:text-gray-100 font-bold">#</th>
+                  {activeColumns.map((col) => {
+                    const isSorted = sortKey === col.key;
+                    return (
+                      <th
+                        key={col.key}
+                        className={`py-1 px-1.5 text-gray-800 dark:text-gray-100 font-bold whitespace-nowrap ${"numeric" in col && col.numeric ? "text-right" : "text-left"}`}
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <button
+                            onClick={() => {
+                              if (sortKey === col.key) {
+                                setSortDir(sortDir === "asc" ? "desc" : "asc");
+                              } else {
+                                setSortKey(col.key);
+                                setSortDir("asc");
+                              }
+                            }}
+                            className="flex items-center gap-1 hover:text-blue-600 transition-colors text-left"
+                          >
+                            {col.label}
+                            {isSorted ? (
+                              <svg className="w-3 h-3 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortDir === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                              </svg>
+                            ) : (
+                              <svg className="w-3 h-3 shrink-0 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                              </svg>
+                            )}
+                          </button>
+                          <input
+                            type="text"
+                            placeholder="กรอง..."
+                            value={columnFilters[col.key] || ""}
+                            onChange={(e) => setColumnFilters((prev) => ({ ...prev, [col.key]: e.target.value }))}
+                            className="w-full min-w-[50px] border border-gray-200 dark:border-gray-600 rounded px-1 py-0.5 text-[10px] text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 bg-white dark:bg-gray-700"
+                          />
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
                 {filteredData.map((row, i) => (
-                  <tr key={row.vn || i} className="border-b border-gray-50 hover:bg-blue-50/50 transition-colors">
-                    <td className="py-1.5 px-1.5 text-center text-gray-400">{i + 1}</td>
+                  <tr key={row.vn || i} className="border-b border-gray-50 dark:border-gray-700 hover:bg-blue-50/50 dark:hover:bg-gray-700 transition-colors">
+                    <td className="py-1.5 px-1.5 text-center text-gray-400 dark:text-gray-500">{i + 1}</td>
                     {activeColumns.map((col) => {
                       const val = row[col.key as keyof OpdRow];
                       const isNumeric = "numeric" in col && col.numeric;
@@ -857,15 +915,16 @@ export default function OutpatientPage() {
                             col.key === "vn" ? "text-blue-600 font-mono" :
                             col.key === "hn" ? "text-purple-600 font-mono" :
                             col.key === "pdx" ? "text-red-600 font-mono font-medium" :
+                            col.key === "nee" ? "text-red-600 font-mono" :
                             col.key === "status_eclaim" ? "" :
-                            "text-gray-700"
+                            "text-gray-700 dark:text-gray-300"
                           }`}
                         >
                           {col.key === "status_eclaim" && val ? (
                             <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                              String(val).includes("สำเร็จ") || String(val).includes("Success") ? "bg-emerald-50 text-emerald-600" :
-                              String(val).includes("ปฏิเสธ") || String(val).includes("Error") ? "bg-red-50 text-red-600" :
-                              "bg-amber-50 text-amber-600"
+                              String(val).includes("สำเร็จ") || String(val).includes("Success") ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600" :
+                              String(val).includes("ปฏิเสธ") || String(val).includes("Error") ? "bg-red-50 dark:bg-red-900/30 text-red-600" :
+                              "bg-amber-50 dark:bg-amber-900/30 text-amber-600"
                             }`}>
                               {String(val)}
                             </span>
@@ -883,19 +942,19 @@ export default function OutpatientPage() {
             </table>
           </div>
           {filteredData.length === 0 && data.length > 0 && (
-            <div className="text-center py-8 text-gray-400 text-sm">ไม่พบข้อมูลที่ตรงกับการค้นหา</div>
+            <div className="text-center py-8 text-gray-400 dark:text-gray-500 text-sm">ไม่พบข้อมูลที่ตรงกับการค้นหา</div>
           )}
         </div>
       )}
 
       {/* Empty state */}
       {!loading && data.length === 0 && !error && (
-        <div className="bg-white rounded-2xl p-16 border border-gray-100 shadow-sm text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-16 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
           <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h3 className="text-lg font-semibold text-gray-500">เลือกวันที่แล้วกดค้นหา</h3>
-          <p className="text-sm text-gray-400 mt-1">ระบบจะดึงข้อมูลผู้ป่วยนอกจากฐานข้อมูล HOS</p>
+          <h3 className="text-lg font-semibold text-gray-500 dark:text-gray-400">เลือกวันที่แล้วกดค้นหา</h3>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">ระบบจะดึงข้อมูลผู้ป่วยนอกจากฐานข้อมูล HOS</p>
         </div>
       )}
     </>
